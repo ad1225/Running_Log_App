@@ -1,3 +1,3 @@
-# amandadoyne_project
+# Running_Log_App
 
-Hello World.
+
