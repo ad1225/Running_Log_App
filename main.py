@@ -105,7 +105,6 @@ class App(Tk):
         # Scrolled text widget for calculations 
         self.calculations_text = ScrolledText(self, width=100, height=10)
         self.calculations_text.grid(row=12, column=0, columnspan=10, padx=10, pady=10,)
-        # self.calculations_text.insert(self.results)
 
         # Scrolled text widget for displaying excel spreadsheet data
         self.excel_text = ScrolledText(self, width=100, height=20)
@@ -140,7 +139,7 @@ class App(Tk):
         # Sends new row to excel spreadsheet
         self.df.to_excel(self.current_file, index=False)
         
-        # # Clears and diplays changes in excel textbox
+        # # Clears and displays changes in excel textbox
         self.excel_text.delete("1.0", END) 
         self.excel_text.insert(END, self.df)
 
@@ -157,7 +156,7 @@ class App(Tk):
         # Sends edit to excel spreadsheet
         self.df.to_excel(self.current_file, index=False)
 
-        # Clears and diplays changes in excel textbox
+        # Clears and displays changes in excel textbox
         self.excel_text.delete("1.0", END)
         self.excel_text.insert(END, self.df)
 
