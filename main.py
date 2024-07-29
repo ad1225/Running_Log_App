@@ -10,9 +10,13 @@ import openpyxl as op
 
 class App(Tk):
     def __init__(self):
+        """
+        Layout and creates the GUI. 
+        """
         Tk.__init__(self)
         self.title('Running Log App')
 
+        # TODO: Be able to handle older excel file versions.
         # Open a dialog to select the XLSX file
         file_path = filedialog.askopenfilename(filetypes=[("XLSX files", "*.xlsx")])
         if file_path:  # If a file was selected
@@ -50,6 +54,7 @@ class App(Tk):
         self.run_select = StringVar()
         self.road_select = Radiobutton(self, width=10, text="Road", variable=self.run_select, value="road")
         self.road_select.grid(row=3, column=1, padx=10, pady=10, sticky="ew")
+        self.run_select.set("road")
 
         self.trail_select = Radiobutton(self, width=10, text="Trail", variable=self.run_select, value="trail")
         self.trail_select.grid(row=3, column=2, padx=10, pady=10, sticky="ew")
@@ -112,8 +117,10 @@ class App(Tk):
         self.excel_text.insert(END, self.df)
 
 
-    # Add new row of data
     def input_data(self):
+        """
+        Adds new row of data.
+        """
         # User inputs
         date_str = self.date_input.get_date() # Convert date string into date object (has time) and extract just date part
         date = datetime.strptime(date_str, "%m/%d/%Y").date()
@@ -131,7 +138,7 @@ class App(Tk):
         pace = round(total_minutes / miles)
 
         # Creating new row of data based on user inputs
-        new_row = pd.DataFrame({'Date': [date], 'Run Type': [run_type], 'Hours': [hours], 'Minutes': [minutes], 'Seconds': [seconds], 'Miles': [miles], 'Pace':[pace]})
+        new_row = pd.DataFrame({'Date': [pd.to_datetime(date)], 'Run Type': [run_type], 'Hours': [hours], 'Minutes': [minutes], 'Seconds': [seconds], 'Miles': [miles], 'Pace':[pace]})
 
         # Adding new row 
         self.df = pd.concat([self.df, new_row], ignore_index=True)
@@ -144,8 +151,10 @@ class App(Tk):
         self.excel_text.insert(END, self.df)
 
 
-    # Delete row
     def delete_row(self):
+        """
+        Deletes last row.
+        """
         # Getting index of row
         index_list = list(self.df.index.values) # Gets index values and makes it a list
         last_index = index_list[-1] 
@@ -161,10 +170,26 @@ class App(Tk):
         self.excel_text.insert(END, self.df)
 
     
-    # Calculating daily averages for each road and trail runs per month
     def monthly_averages_results(self):
-        # Function that takes a df, a month as an integer and a runtype and returns the daily average miles per month
+        """
+        Calculates the daily averages for each road and trail runs per month. 
+        """
+        
         def get_monthly_averages(df_copy, month, runtype):
+            """
+            Takes a df, month as an integer, and a runtype and returns the daily average miles per month.
+
+           Parameters:
+                df (DataFrame): The input DataFrame containing the running log data.
+                month (int): The month for which to calculate the averages (1-12).
+                runtype (str): The type of run for which to calculate the averages.
+
+            Returns:
+                miles (float): The average number of miles for the specified month and run type.
+                total_hours (float): The average total hours for the specified month and run type.
+                pace (float): The average pace for the specified month and run type.
+            """
+
             df_month = df_copy[df_copy.index.month == month]
             if len(df_month) == 0:
                 return None, None, None # need 3 None's to match the return type
@@ -196,16 +221,24 @@ class App(Tk):
                 miles, total_hours, pace = get_monthly_averages(df_copy, month, runtype)
                 if miles is not None: # all three are None if there is no data for that month
                     results = (f"Daily average {runtype} miles for Month {month}: {miles} miles\n")
+                    # TODO: Clear the textbox of old results before new results are displayed.
                     self.calculations_text.insert(END, results)
 
 
+    # TODO: Be able to handle older excel file versions.
     def save_xlsx(self):
-        # save the current DataFrame to an XLSX file
+        """
+        Saves the current DataFrame to an excel (XLSX) file. 
+        """
         if self.current_file:
             self.df.to_excel(self.current_file, index=False)
             messagebox.showinfo("Saved")
 
+    # TODO: Be able to handle older excel file versions.
     def save_as_xlsx(self):
+        """
+        Saves the current DataFrame to a new excel file. 
+        """
         if self.current_file:
             # Save the current DataFrame to a new XLSX file
             file_path = filedialog.asksaveasfilename(filetypes=[("XLSX files", "*.xlsx")])
@@ -217,8 +250,11 @@ class App(Tk):
                 self.df.to_excel(file_path, index=False)
                 messagebox.showinfo("Saved As")
 
+    # TODO: Be able to handle older excel file versions.
     def load_xlsx(self):
-        # Open a dialog to select the XLSX file
+        """
+        Opens a dialog to select the excel file. 
+        """
         file_path = filedialog.askopenfilename(filetypes=[("XLSX files", "*.xlsx")])
         if file_path:  # If a file was selected
             self.current_file = file_path # Save the file path for future reference
@@ -229,8 +265,10 @@ class App(Tk):
             self.excel_text.delete("1.0", END)
             self.excel_text.insert(END, self.df)
 
-    # When closing app, saves the current DataFrame to the current file
     def save_on_close(self):
+        """
+        Saves the current DataFrame to the current file when closing the app. 
+        """
         if self.current_file:
             self.df.to_excel(self.current_file, index=False)
         self.destroy()
